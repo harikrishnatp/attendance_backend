@@ -26,6 +26,23 @@ with app.app_context():
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+@app.route('/users', methods=['GET'])
+def get_users():
+    try:
+        users = User.query.all()
+        result = []
+        for user in users:
+            result.append({
+                'user_id': user.id,
+                'name': user.name,
+                'rollNo': user.rollNo,
+                'macaddress': user.macaddress
+            })
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"Error fetching users: {e}")
+        return jsonify({'message': 'Internal Server Error'}), 500
+
 @app.route('/users', methods=['POST'])
 def create_user():
     try:
@@ -37,7 +54,7 @@ def create_user():
         if existing_user:
             return jsonify({'message': 'User with this roll number already exists'}), 400
 
-        new_user = User(name=data['name'], rollNo=data['rollNo'])
+        new_user = User(name=data['name'], rollNo=data['rollNo'], macaddress=data['macaddress'])
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message': 'User created', 'user': new_user.name}), 201
