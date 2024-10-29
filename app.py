@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 def create_user():
     try:
         data = request.get_json()
-        if not data or 'name' not in data or 'rollNo' not in data or 'mac_address' not in data:
+        if not data or 'name' not in data or 'rollNo' not in data:
             return jsonify({'message': 'Missing required fields'}), 400
 
         existing_user = User.query.filter_by(rollNo=data['rollNo']).first()
@@ -65,7 +65,7 @@ def create_log():
 def get_logs():
     try:
         logs = Log.query.all()
-        result = [{'log_id': log.id, 'user_name': log.user.name, 'timestamp': log.timestamp, 'mac_address': log.mac_address} for log in logs]
+        result = [{'log_id': log.id, 'user_name': log.user.name, 'timestamp': log.timestamp} for log in logs]
         return jsonify(result)
     except Exception as e:
         logger.error(f"Error fetching logs: {e}")
@@ -80,13 +80,12 @@ def create_user_form():
     if request.method == 'POST':
         name = request.form['name']
         rollNo = request.form['rollNo']
-        mac_address = request.form['mac_address']
 
         existing_user = User.query.filter_by(rollNo=rollNo).first()
         if existing_user:
             return render_template('create_user.html', error="User with this roll number already exists.")
 
-        new_user = User(name=name, rollNo=rollNo, mac_address=mac_address)
+        new_user = User(name=name, rollNo=rollNo)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('home'))
