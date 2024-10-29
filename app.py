@@ -34,7 +34,7 @@ def create_user():
         if existing_user:
             return jsonify({'message': 'User with this roll number already exists'}), 400
 
-        new_user = User(name=data['name'], rollNo=data['rollNo'], mac_address=data['mac_address'])
+        new_user = User(name=data['name'], rollNo=data['rollNo'])
         db.session.add(new_user)
         db.session.commit()
         return jsonify({'message': 'User created', 'user': new_user.name}), 201
