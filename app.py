@@ -5,6 +5,8 @@ import logging
 from flask_migrate import Migrate
 from models import db, User, Log
 from sqlalchemy import func
+from datetime import datetime
+import pytz
 
 load_dotenv()
 
@@ -71,7 +73,7 @@ def create_log():
         if not user:
             return jsonify({'message': 'User not found'}), 404
 
-        new_log = Log(user_id=user.id)
+        new_log = Log(user_id=user.id, timestamp=datetime.now(pytz.timezone("Asia/Kolkata")))
         db.session.add(new_log)
         db.session.commit()
         return jsonify({'message': 'Log created', 'log_id': new_log.id}), 201
