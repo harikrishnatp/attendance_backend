@@ -1,15 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Home</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>Welcome to User and Log Management</h1>
-    <nav>
-        <a href="{{ url_for('create_user') }}">Create New User</a> | 
-        <a href="{{ url_for('view_logs') }}">View Logs</a>
-    </nav>
-</body>
-</html>
+{% extends "base.html" %}
+{%block head%}
+    {{super()}}
+    <style>
+        body {
+            background-color: #000308;
+            max-height: calc(100vh - 10px);
+            overflow-y: hidden;
+        }
+        .container {
+            width: calc(100vw - 20px);
+            height: calc(100vh - 80px);
+            gap: 10px;
+            overflow-y: scroll;
+        }
+        table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+        }
+        th, td {
+            border: 1px solid #2E333A;
+            padding: 5px;
+            text-align: left;
+        }
+        th {
+            background-color: #20252D;
+        }
+    </style>
+{% endblock head %}
+{% block main %}
+    <div class="container">
+        <h2>Logs</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Roll No</th>
+                    <th>Date</th>
+                    <th>Login Time</th>
+                    <th>Last Seen</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, users in dates.items() %}
+                    <tr>
+                        <th colspan="5" style="text-align: center;background-color:#101317;">{{ date }}</th>
+                    </tr>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.name }}</td>
+                            <td>{{ user.rollNo }}</td>
+                            <td>{{ date }}</td>
+                            <td>{{ user.login_time }}</td>
+                            <td>{{ user.logout_time }}</td>
+                        </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
