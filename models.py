@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import pytz
 
 db = SQLAlchemy()
 
@@ -14,12 +15,13 @@ class User(db.Model):
     def __repr__(self):
         return f"<User {self.name}>"
 
+    
 class Log(db.Model):
     __tablename__ = 'logs'
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, default=datetime.now(pytz.timezone("Asia/Kolkata")))
     
     user = db.relationship('User', backref=db.backref('logs', lazy=True))
 
