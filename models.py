@@ -21,7 +21,7 @@ class Log(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.now(pytz.timezone("Asia/Kolkata")))
+    timestamp = db.Column(db.DateTime)
     
     user = db.relationship('User', backref=db.backref('logs', lazy=True))
 
