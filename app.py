@@ -4,6 +4,7 @@ import os
 import logging
 from flask_migrate import Migrate
 from models import db, User, Log
+from sqlalchemy import func
 
 load_dotenv()
 
@@ -88,11 +89,11 @@ def get_logs():
         logger.error(f"Error fetching logs: {e}")
         return jsonify({'message': 'Internal Server Error'}), 500
 
-@app.route('/')
-def home():
-    return render_template('index.html')
+# @app.route('/')
+# def home():
+#     return render_template('index.html')
 
-@app.route('/create_user', methods=['POST'])
+@app.route('/create_user', methods=['POST','GET'])
 def create_user_form():
     if request.method == 'POST':
         name = request.form['name']
@@ -108,10 +109,37 @@ def create_user_form():
         return redirect(url_for('home'))
     return render_template('create_user.html')
 
-@app.route('/view_logs')
+@app.route('/')
 def view_logs():
     logs = Log.query.all()
-    return render_template('view_logs.html', logs=logs)
+    dates = {}
+    unique_dates = Log.query.with_entities(func.date(Log.timestamp)).distinct().all()
+
+    for date in unique_dates:
+        records = []
+        date = date[0]
+        total_users = User.query.count()
+
+        for i in range(1, total_users+1):
+            user = User.query.filter_by(id=i).first()
+            if user:
+                record_user = Log.query.filter_by(user_id=user.id).all()
+                time_list = []
+                for record in record_user:
+                    if record.timestamp.date() == date:
+                        time_list.append(record.timestamp)
+                
+                min_time = min(time_list) if time_list != [] else 0
+                max_time = max(time_list) if time_list != [] else 0
+                records.append({
+                    'name': user.name,
+                    'rollNo': user.rollNo,
+                    'login_time': min_time.strftime('%I:%M:%S %p') if min_time != 0 else 'Absent',
+                    'logout_time': max_time.strftime('%I:%M:%S %p') if max_time != 0 else 'Absent',
+                })
+        dates[date.strftime('%d/%m/%Y')] = records
+
+    return render_template('index.html', dates=dates)
 
 if __name__ == '__main__':
     app.run(debug=True)
