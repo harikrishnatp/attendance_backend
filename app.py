@@ -5,7 +5,7 @@ import logging
 from flask_migrate import Migrate
 from models import db, User, Log
 from sqlalchemy import func
-from datetime import datetime
+from datetime import datetime, date
 import pytz
 
 load_dotenv()
