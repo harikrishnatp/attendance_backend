@@ -118,11 +118,11 @@ def view_logs():
         func.min(func.time(Log.timestamp)).label("login_time"),
         func.max(func.time(Log.timestamp)).label("logout_time")
     ).group_by(User.id, func.date(Log.timestamp)).order_by(func.date(Log.timestamp).desc()).all()
-
+    
     users = User.query.all()
     unique_dates = set(log.date for log in logs)
     grouped_logs = {}
-
+    
     for date in sorted(unique_dates, reverse=True):
         records = []
         for user in users:
@@ -146,43 +146,11 @@ def view_logs():
                     'logout_time': 'Absent'
                 })
         grouped_logs[date.strftime('%d/%m/%Y')] = records
-
+    
     return render_template('index.html', dates=grouped_logs)
 
-@app.route('/current_day')
-def current_day():
-    today = date.today()
-    logs = Log.query.join(User, Log.user_id == User.id).with_entities(
-        User.name, User.rollNo, func.date(Log.timestamp).label("date"),
-        func.min(func.time(Log.timestamp)).label("login_time"),
-        func.max(func.time(Log.timestamp)).label("logout_time")
-    ).filter(func.date(Log.timestamp) == today).group_by(User.id, func.date(Log.timestamp)).all()
-
-    users = User.query.all()
-    records = []
-
-    for user in users:
-        user_logs = [log for log in logs if log.name == user.name and log.date == today]
-        if user_logs:
-            login_time = min(log.login_time for log in user_logs)
-            logout_time = max(log.logout_time for log in user_logs)
-            login_time = datetime.strptime(str(login_time), "%H:%M:%S").strftime("%I:%M %p")
-            logout_time = datetime.strptime(str(logout_time), "%H:%M:%S").strftime("%I:%M %p")
-            records.append({
-                'name': user.name,
-                'rollNo': user.rollNo,
-                'login_time': login_time,
-                'logout_time': logout_time
-            })
-        else:
-            records.append({
-                'name': user.name,
-                'rollNo': user.rollNo,
-                'login_time': 'Absent',
-                'logout_time': 'Absent'
-            })
-
-    return jsonify({today.strftime('%d/%m/%Y'): records})
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
